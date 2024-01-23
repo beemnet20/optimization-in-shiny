@@ -1,0 +1,8 @@
+Package: optimization-in-shiny
+Title: Optimization In Shiny
+Version: 0.0.0.1
+Author: Bee Workeneh
+Description: A shiny app to demo optimization algorithm
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.0.0
