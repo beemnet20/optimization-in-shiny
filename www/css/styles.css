@@ -1,8 +1,9 @@
 body {
     display: flex;
-    justify-content: center; 
-    align-items: center; 
     min-height: 100vh;
+    min-width: 48rem;
+    width: 70%;
+    margin: 0 auto;
 }
 
 sup {
@@ -42,7 +43,7 @@ sup {
 }
 
 .grid-container {
-  margin: 10px 10px;
+  margin: 0 auto;
   background: black;
   display: flex;
   justify-content: space-evenly;
@@ -52,7 +53,7 @@ sup {
 }
 
 .grid-box{
-    background: black;
+    background: black !important;
     border: 3px solid white !important;
     box-sizing: border-box !important;
     margin: -1.5px !important;
