@@ -16,7 +16,7 @@ ui <- fluidPage(
   #Home and About page UI components are 
   #imported in headerUI component
   headerUI("header"),
-  homecUI("home"),
+  homeUI("home"),
   # initialize shinyStore
   shinyStore::initStore("store", "shiny-demo-store")
   

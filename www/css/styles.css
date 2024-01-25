@@ -43,8 +43,6 @@ sup {
 
 .grid-container {
   margin: 10px 10px;
-  width: 820px;
-  height: 420px;
   background: black;
   display: flex;
   justify-content: space-evenly;
@@ -57,8 +55,6 @@ sup {
     background: black;
     border: 3px solid white !important;
     box-sizing: border-box !important;
-    height: 80px !important;
-    width:  80px !important;
     margin: -1.5px !important;
     text-align: center !important;
     vertical-align: middle !important;
