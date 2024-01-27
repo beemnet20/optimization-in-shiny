@@ -59,6 +59,46 @@ gridServer <-
       }
       grid_state <- reactiveVal(initial_state)
       
+      current_cost <- reactiveVal(NULL)
+      
+      update_current_cost <- function(){
+        cost <- ifelse(is.null(current_cost()), 0, current_cost() )
+        state <- grid_state()
+        occupied_coordinates <- which(state != "", arr.ind = TRUE)
+        hospital_coordinates <- list()
+        
+        
+        for (idx in 1:nrow(occupied_coordinates)) {
+          i <- occupied_coordinates[idx, 1]
+          j <- occupied_coordinates[idx, 2]
+
+          element <- state[i, j]
+          if (grepl("hospital", element)){
+            hospital_coordinates[[length(hospital_coordinates)+1]] = list(i=i, j=j)
+          }
+        }
+        
+        for (house in house_coordinates) {
+          house_i <- house$i
+          house_j <- house$j
+          
+          # Calculate distances from this house to all hospitals
+          distances <- sapply(hospital_coordinates, function(hospital) {
+            hospital_i <- hospital[['i']]
+            hospital_j <- hospital[['j']]
+            # Calculate Manhattan distance
+            abs(house_i - hospital_i) + abs(house_j - hospital_j)
+          })
+          
+          # Add the minimum distance for this house to the total cost
+          cost <- cost + min(distances)
+
+        }
+        print("cost")
+        print(cost)
+        output$current_cost <- renderText(paste0("Current cost: ", cost))
+      }
+      
       update_grid_state <- function(box_id, item_id) {
         state <- grid_state()
         indices <-
@@ -81,6 +121,14 @@ gridServer <-
               "px; margin: 0 auto; height:",
               grid_box_size/2,
               "px;"
+            ), 
+            fluidRow(
+              column(6,
+                     tags$h3(style="color: white; margin-top:2px;", textOutput(ns("optimal_cost")))
+                     ),
+              column(6,
+                     tags$h3(style="color: white; margin-top:2px;", textOutput(ns("current_cost")))
+                     )
             )
           ),
           div(
@@ -159,8 +207,8 @@ gridServer <-
               observeEvent(input[[box_id]], {
                 hospital_id <-
                   paste0("hospital-", as.numeric(gsub("\\D", "", input[[box_id]])))
-                print(hospital_id)
                 update_grid_state(box_id, hospital_id)
+                update_current_cost()
               }, ignoreNULL = TRUE)
             }
           })
