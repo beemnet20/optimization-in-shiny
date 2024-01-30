@@ -10,6 +10,102 @@ gridUI <- function(id, manual = TRUE) {
             })
 }
 
+calculate_cost <- function(houses, hospitals) {
+  cost <- 0
+  
+  for (house in houses) {
+    house_i <- house$i
+    house_j <- house$j
+    
+    distances <- sapply(hospitals, function(hospital) {
+      hospital_i <- hospital[['i']]
+      hospital_j <- hospital[['j']]
+      abs(house_i - hospital_i) + abs(house_j - hospital_j)
+    })
+    
+    cost <- cost + min(distances)
+  }
+  
+  return(cost)
+}
+
+perform_hill_climbing <- function(initial_state, house_coordinates, num_hospitals, num_rows, num_columns) {
+  best_state <- initial_state
+  best_cost <- num_rows*num_columns
+  
+  for (iter in 1:100) {  # Adjust the number of iterations as needed
+    current_state <- best_state
+    improved <- FALSE
+    
+    for (hospital_num in 1:num_hospitals) {
+      for (i in 1:num_rows) {
+        for (j in 1:num_columns) {
+          # Check if current position is a house
+          if (!is_house_position(i, j, house_coordinates)) {
+            # Try moving a hospital to this position
+            new_state <- move_hospital(current_state, hospital_num, i, j, num_hospitals, house_coordinates)
+            new_cost <- calculate_cost(house_coordinates, extract_hospitals(new_state))
+            
+            if (new_cost < best_cost) {
+              best_cost <- new_cost
+              best_state <- new_state
+              improved <- TRUE
+            }
+          }
+        }
+      }
+    }
+    
+    if (!improved) {
+      break  # No better state found
+    }
+  }
+  
+  return(best_state)
+}
+
+is_house_position <- function(i, j, house_coordinates) {
+  any(sapply(house_coordinates, function(coord) coord$i == i && coord$j == j))
+}
+
+move_hospital <- function(state, hospital_num, new_i, new_j, num_hospitals, house_coordinates) {
+  # Find the current position of the hospital to move
+  current_hospital_label <- paste0("hospital-", hospital_num)
+  current_hospital_coords <- which(state == current_hospital_label, arr.ind = TRUE)
+  
+  # If the hospital is already placed in the grid, clear its current position
+  if (length(current_hospital_coords) > 0) {
+    state[current_hospital_coords] <- ""
+  }
+  
+  # Place the hospital at the new location if it's not a house position
+  if (!is_house_position(new_i, new_j, house_coordinates)) {
+    state[new_i, new_j] <- current_hospital_label
+  }
+  
+  return(state)
+}
+
+
+
+
+extract_hospitals <- function(state) {
+  occupied_coordinates <- which(state != "", arr.ind = TRUE)
+  hospital_coordinates <- list()
+  
+  for (idx in 1:nrow(occupied_coordinates)) {
+    i <- occupied_coordinates[idx, 1]
+    j <- occupied_coordinates[idx, 2]
+    
+    element <- state[i, j]
+    if (grepl("hospital", element)){
+      hospital_coordinates[[length(hospital_coordinates)+1]] = list(i=i, j=j)
+    }
+  }
+  return(hospital_coordinates)
+}
+
+
 gridServer <-
   function(id,
            num_houses = 4,
@@ -58,44 +154,17 @@ gridServer <-
         initial_state[i, j] <- item_id
       }
       grid_state <- reactiveVal(initial_state)
-      
+      optimal_state <- perform_hill_climbing(initial_state, house_coordinates,num_hospitals, grid_rows, grid_columns )
+      optimal_cost <- calculate_cost(house_coordinates, extract_hospitals(optimal_state))
+      output$optimal_cost <- renderText(paste0("Optimal cost: ", optimal_cost))
       current_cost <- reactiveVal(NULL)
       
       update_current_cost <- function(){
-        cost <- ifelse(is.null(current_cost()), 0, current_cost() )
         state <- grid_state()
-        occupied_coordinates <- which(state != "", arr.ind = TRUE)
-        hospital_coordinates <- list()
+        hospital_coordinates <- extract_hospitals(state)
         
-        
-        for (idx in 1:nrow(occupied_coordinates)) {
-          i <- occupied_coordinates[idx, 1]
-          j <- occupied_coordinates[idx, 2]
-
-          element <- state[i, j]
-          if (grepl("hospital", element)){
-            hospital_coordinates[[length(hospital_coordinates)+1]] = list(i=i, j=j)
-          }
-        }
-        
-        for (house in house_coordinates) {
-          house_i <- house$i
-          house_j <- house$j
-          
-          # Calculate distances from this house to all hospitals
-          distances <- sapply(hospital_coordinates, function(hospital) {
-            hospital_i <- hospital[['i']]
-            hospital_j <- hospital[['j']]
-            # Calculate Manhattan distance
-            abs(house_i - hospital_i) + abs(house_j - hospital_j)
-          })
-          
-          # Add the minimum distance for this house to the total cost
-          cost <- cost + min(distances)
-
-        }
-        print("cost")
-        print(cost)
+        cost <- calculate_cost(house_coordinates, hospital_coordinates)
+        current_cost(cost)
         output$current_cost <- renderText(paste0("Current cost: ", cost))
       }
       
@@ -124,10 +193,10 @@ gridServer <-
             ), 
             fluidRow(
               column(6,
-                     tags$h3(style="color: white; margin-top:2px;", textOutput(ns("optimal_cost")))
+                     tags$h3(style="color: white; margin: auto; width: 80%;", textOutput(ns("optimal_cost")))
                      ),
               column(6,
-                     tags$h3(style="color: white; margin-top:2px;", textOutput(ns("current_cost")))
+                     tags$h3(style="color: white; margin: auto; width: 80%;", textOutput(ns("current_cost")))
                      )
             )
           ),
