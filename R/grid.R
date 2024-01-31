@@ -36,7 +36,7 @@ perform_hill_climbing <- function(initial_state, house_coordinates, num_hospital
   for (iter in 1:100) {  # Adjust the number of iterations as needed
     current_state <- best_state
     improved <- FALSE
-    
+
     for (hospital_num in 1:num_hospitals) {
       for (i in 1:num_rows) {
         for (j in 1:num_columns) {
@@ -82,7 +82,6 @@ move_hospital <- function(state, hospital_num, new_i, new_j, num_hospitals, hous
   if (!is_house_position(new_i, new_j, house_coordinates)) {
     state[new_i, new_j] <- current_hospital_label
   }
-  
   return(state)
 }
 
