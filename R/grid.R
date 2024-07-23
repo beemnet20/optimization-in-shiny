@@ -111,8 +111,7 @@ gridServer <-
            num_hospitals = 2,
            grid_columns = 10,
            grid_rows = 5,
-           manual = TRUE,
-           store = NULL) {
+           manual = TRUE) {
     moduleServer(id, function(input, output, session) {
       ns <- session$ns
       

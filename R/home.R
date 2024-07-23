@@ -7,8 +7,8 @@ homeUI <- function(id){
   )
 }
 
-homeServer <- function(id, store = NULL){
-  mainPageServer("main", store)
+homeServer <- function(id){
+  mainPageServer("main")
   moduleServer(id, function(input, output, session){
     #module code
   })

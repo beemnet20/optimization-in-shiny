@@ -58,7 +58,7 @@ headerUI <- function(id) {
       ),
       div(
         class = "chip",
-        a(class="text-dark", href = "https://beemnet17.wixsite.com/beemnetworkeneh", target = "_blank", "Portfolio")
+        a(class="text-dark", href = "https://beemnet20.github.io/portfolio/", target = "_blank", "Portfolio")
       )
       
     )

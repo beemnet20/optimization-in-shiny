@@ -45,7 +45,7 @@ mainPageUI <- function(id) {
 }
 
 
-mainPageServer <- function(id, store = NULL) {
+mainPageServer <- function(id) {
   gridServer("demo-grid-1", manual=TRUE)
   moduleServer(id, function(input, output, session) {
     

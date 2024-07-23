@@ -17,22 +17,15 @@ ui <- fluidPage(
   #imported in headerUI component
   headerUI("header"),
   homeUI("home"),
-  # initialize shinyStore
-  shinyStore::initStore("store", "shiny-demo-store")
   
 
 )
 
 # Define server logic required to draw a histogram ----
 server <- function(input, output, session) {
-  #---------------------------------------------------
-  # We need to pass store to modules that require local storage
-  store <- reactive({
-    input$store
-  })
-  #---------------------------------------------------
+
   headerServer("header")
-  homeServer("home", store=store)
+  homeServer("home")
 
 }
 
